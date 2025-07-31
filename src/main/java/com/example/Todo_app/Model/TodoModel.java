@@ -1,61 +1,57 @@
 package com.example.Todo_app.Model;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "todos")
 public class TodoModel {
+    // 主キー定義
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     // プライベートフィールド
-    private String taskadd;
-    private String taskdisplay;
-    private String taskswitching;
-    private String taskupdate;
-    private String taskdelete;
+    private String task;
+    private boolean completed;
+    private LocalDateTime createdAt;
 
     // コンストラクタ
-    public TodoModel(String taskadd, String taskdisplay, String taskswitching, String taskupdate,String taskdelete) {
-        this.taskadd = taskadd;
-        this.taskdisplay = taskdisplay;
-        this.taskswitching = taskswitching;
-        this.taskupdate = taskupdate;
-        this.taskdelete = taskdelete;
+    public TodoModel() {} // デフォルトコンストラクタ(JPA用)
+    public TodoModel(String task) {
+        this.task = task;
+        this.completed = false;
+        this.createdAt = LocalDateTime.now();
     }
 
     // ゲッター(読み取り用)
-    public String getTaskadd() {
-        return this.taskadd;
+    public String getTask() {
+        return this.task;
     }
 
-    public String getTaskdisplay() {
-        return this.taskdisplay;
+    public boolean getCompleted() {
+        return this.completed;
     }
 
-    public String getTaskswitching() {
-        return this.taskswitching;
-    }
-
-    public String getTaskupdate() {
-        return this.taskupdate;
-    }
-
-    public String getTaskdelete() {
-        return this.taskdelete;
+    public LocalDateTime getCreatedAt() {
+        return this.createdAt;
     }
 
     // セッター(書き込み用)
-    public void setTaskadd(String taskadd) {
-        this.taskadd = taskadd;
+    public void setTask(String task) {
+        this.task = task;
     }
 
-    public void setTaskdisplay(String taskdisplay) {
-        this.taskdisplay = taskdisplay;
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 
-    public void setTaskswitching(String taskswitching) {
-        this.taskswitching = taskswitching;
-    }
-
-    public void setTaskupdate(String taskupdate) {
-        this.taskupdate = taskupdate;
-    }
-
-    public void setTaskdelete(String taskdelete) {
-        this.taskdelete = taskdelete;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
