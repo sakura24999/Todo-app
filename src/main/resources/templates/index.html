@@ -12,15 +12,10 @@
         <h1 class="Todo-header-title">Todoタスクアプリ</h1>
         </header>
         
-        <input type="text" class="Todo-add-input">
-        <form th:action="@{/}" me
-        ="post"><button class="Todo-add-btn" type="submit">追加</button></form>
+        <form th:action="@{/add}" method
+        ="post"><input type="text" name="text" placeholder="新しいタスクを入力してください" class="Todo-add-input"><button class="Todo-add-btn" type="submit">追加</button></form>
 
-        <input type="text" class="Todo-update-input">
-        <form th:action="@{/}" method="post"><button class="Todo-update-btn">更新</button></form>
-
-        <input type="text" class="Todo-delete-input">
-        <form th:action="@{/}" method="Todo-delete-btn">削除</form>
+        <form th:action="@{/delete}" method="post"><button class="Todo-delete-btn">削除</button></form>
     </div>
 </body>
 </html>
