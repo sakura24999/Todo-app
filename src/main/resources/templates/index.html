@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todoタスクアプリ</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+    <div class="Todo-main">
+        <header class="Todo-header">
+        <h1 class="Todo-header-title">Todoタスクアプリ</h1>
+        </header>
+        
+        <input type="text" class="Todo-add-input">
+        <form th:action="@{/}" me
+        ="post"><button class="Todo-add-btn" type="submit">追加</button></form>
+
+        <input type="text" class="Todo-update-input">
+        <form th:action="@{/}" method="post"><button class="Todo-update-btn">更新</button></form>
+
+        <input type="text" class="Todo-delete-input">
+        <form th:action="@{/}" method="Todo-delete-btn">削除</form>
+    </div>
+</body>
+</html>
