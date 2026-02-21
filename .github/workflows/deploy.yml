@@ -32,7 +32,11 @@ jobs:
 
       - name: Create S3 Bucket
         run: |
-          awslocal s3 sync . s3://${{ env.BUCKET_NAME}}
+          awslocal s3 mb s3://${{ env.BUCKET_NAME}} --region ${{ env.AWS_REGION}}
+
+      - name: Sync files to S3
+        run: |
+          awslocal s3 sync . s3://${{ env.BUCKET_NAME}} \
             --delete \
             --exclude ".git/*" \
             --exclude "github/*"
