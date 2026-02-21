@@ -29,14 +29,14 @@ jobs:
           aws configure set aws_access_key_id test
           aws configure set aws_secret_access_key test
           aws configure set region ${{ env.AWS_REGION }}
-      
+
       - name: Create S3 Bucket
         run: |
-          awslocal s3 sync . s3://${{ env.s3-test-bucket}}
+          awslocal s3 sync . s3://${{ env.BUCKET_NAME}}
             --delete \
             --exclude ".git/*" \
             --exclude "github/*"
-      
+
       - name: Verify upload
         run: |
-          awslocal s3 ls s3://${{ env.s3-test-bucket}}
+          awslocal s3 ls s3://${{ env.BUCKET_NAME}}
