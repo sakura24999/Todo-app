@@ -1,0 +1,42 @@
+name: Deploy to S3(LocalStack)
+
+on:
+  push:
+    branches: [ feature ]
+
+env:
+  BUCKET_NAME: "s3-test-bucket"
+  AWS_REGION: "ap-northeast-1"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
+
+      - name: Configure AWS credentials (dummy for LocalStack)
+        run: |
+          aws configure set aws_access_key_id test
+          aws configure set aws_secret_access_key test
+          aws configure set region ${{ env.AWS_REGION }}
+      
+      - name: Create S3 Bucket
+        run: |
+          awslocal s3 sync .s3://${{ env.s3-test-bucket}}
+            --delete \
+            --exclude ".git/*" \
+            --exclude "github/*"
+      
+      - name: Verify upload
+        run: |
+          awslocal s3 ls s3://${{ env.s3-test-bucket}}
