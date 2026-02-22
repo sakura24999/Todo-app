@@ -54,6 +54,8 @@ jobs:
               --code S3Bucket=s3-test-bucket,S3Key=function.zip
           fi
 
+          sleep 10
+
           aws --endpoint-url=$ENDPOINT_URL lambda update-function-code \
             --function-name lambda-function \
             --s3-bucket s3-test-bucket \
