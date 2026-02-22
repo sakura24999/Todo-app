@@ -36,8 +36,11 @@ jobs:
           AWS_DEFAULT_REGION: ap-northeast-1
           ENDPOINT_URL: http://localhost:4566
         run: |
-          aws --endpoint-url=$ENDPOINT_URL s3 cp function.zip s3://s3-test-bucket/function.zip
-          aws --endpoint-url=$ENDPOINT_URL lambda update-function-code \
+          awslocal ----endpoint-url=$ENDPOINT_URL s3 mb s3://s3-test-bucket
+
+          awslocal --endpoint-url=$ENDPOINT_URL s3 cp function.zip s3://s3-test-bucket/function.zip
+          
+          awslocal --endpoint-url=$ENDPOINT_URL lambda update-function-code \
             --function-name my-function \
             --s3-bucket s3-test-bucket \
             --s3-key function.zip
