@@ -40,7 +40,7 @@ jobs:
 
           aws --endpoint-url=$ENDPOINT_URL s3 cp function.zip s3://s3-test-bucket/function.zip
 
-          if aws ----endpoint-url=$ENDPOINT_URL lambda get function --function-name lambda-function > /dev/null 2>&1; then
+          if aws --endpoint-url=$ENDPOINT_URL lambda get function --function-name lambda-function > /dev/null 2>&1; then
            aws --endpoint-url=$$ENDPOINT_URL lambda update-function-code \
              -- function-name lambda-function \
              --s3-bucket s3-test-bucket \
@@ -50,7 +50,7 @@ jobs:
               --function-name lambda-function \
               --runtime python3.9 \
               --role arn:aws:iam::000000000000:role/lambda-role \
-              --handler lambda_function.lambda_handler \
+              --handler lambda_function/app.lambda_handler \
               --code S3Bucket=s3-test-bucket,S3Key=function.zip
           fi
 
