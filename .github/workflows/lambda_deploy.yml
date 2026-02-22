@@ -26,8 +26,8 @@ jobs:
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt -t package/;
           fi
-          find . -maxdepth 1 -name "*.py" -exec cp {} package/ \;
-          
+          cp -r lambda.function/. package/
+
           cd package && zip -r ../function.zip .
       - name: Deploy to LocalStack
         env:
