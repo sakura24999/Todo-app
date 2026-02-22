@@ -54,7 +54,8 @@ jobs:
               --code S3Bucket=s3-test-bucket,S3Key=function.zip
           fi
 
-          sleep 10
+          echo "Waiting for function to become Active..."
+          aws ----endpoint-url=$$ENDPOINT_URL lambda wait function-active-v2 --function-name lambda-function
 
           aws --endpoint-url=$ENDPOINT_URL lambda update-function-code \
             --function-name lambda-function \
