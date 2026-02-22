@@ -55,7 +55,7 @@ jobs:
           fi
 
           echo "Waiting for function to become Active..."
-          aws ----endpoint-url=$$ENDPOINT_URL lambda wait function-active-v2 --function-name lambda-function
+          aws --endpoint-url=$$ENDPOINT_URL lambda wait function-active-v2 --function-name lambda-function
 
           aws --endpoint-url=$ENDPOINT_URL lambda update-function-code \
             --function-name lambda-function \
