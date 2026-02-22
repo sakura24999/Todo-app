@@ -36,7 +36,7 @@ jobs:
           AWS_DEFAULT_REGION: ap-northeast-1
           ENDPOINT_URL: http://localhost:4566
         run: |
-          aws ----endpoint-url=$ENDPOINT_URL s3 mb s3://s3-test-bucket
+          aws --endpoint-url=$ENDPOINT_URL s3 mb s3://s3-test-bucket
 
           aws --endpoint-url=$ENDPOINT_URL s3 cp function.zip s3://s3-test-bucket/function.zip
 
