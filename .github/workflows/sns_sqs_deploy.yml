@@ -33,7 +33,7 @@ jobs:
 
       - name: Subscribe SQS to SNS
         run: |
-          TOPIC_ARN=$(awslocal sns list-topic --query 'Topic[0].TopicArn' --output text)
+          TOPIC_ARN=$(awslocal sns list-topics --query 'Topic[0].TopicArn' --output text)
           --attribute-names QueueArn \
           --query 'Attributes.QueueArn' --output text)
           awslocal sns subscribe \
