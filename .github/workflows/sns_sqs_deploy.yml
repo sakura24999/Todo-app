@@ -1,0 +1,70 @@
+name: SNS SQS Notification Pipeline
+
+on:
+  push:
+    branches: [ feature ]
+  workflow_dispatch:
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with: 
+          python-version: '3.9'
+
+      - name: Create SNS Topic
+        run: |
+          awslocal sns create-topic --name notify-topic
+      
+      - name: Create SQS Queue
+        run: |
+          awslocal sqs create-queue --queue-name notify-queue
+
+      - name: Subscribe SQS to SNS
+        run: |
+          TOPIC_ARN=$(awslocal sns list-topic --query 'Topic[0].TopicArn' --output text)
+          --attribute-names QueueArn \
+          --query 'Attributes.QueueArn' --output text)
+          awslocal sns subscribe \
+            --topic-arn $TOPIC_ARN \
+            --protocol sqs \
+            --notification-endpoint $QUEUE_ARN
+
+      - name: Build and Deploy Lambda
+        run: |
+          mkdir -p package
+          cp -r lambda_function/. package/
+          pip install boto3 -t package/
+          cd package && zip -r ../function.zip .
+          awslocal s3 mb s3://s3-test-bucket/function.zip
+          awslocal s3 cp function.zip s3://s3-test-bucket/function.zip
+          awslocal lambda create-function \
+            --function-name lambda-function \
+            --runtime python3.9 \
+            --role arn:aws:iam::000000000000:role/lambda-role \
+            --handler app.lambda_handler \
+            --code S3Bucket=s3-test-bucket,S3Key=function.zip
+          awslocal lambda wait function-active-v2 --function-name lambda-function
+
+      - name: Invoke Lambda
+        run: |
+          awslocal lambda invoke \
+            --function-name lambda-function \
+            output.json
+          cat output.json
+
+      - name: Verify SQS Message
+        run: |
+          awslocal sqs receive-message \
+            --queue-url http://localhost:4566/000000000000/notify-queue
