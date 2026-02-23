@@ -1,0 +1,38 @@
+name: Approval Gate Pipeline
+
+on:
+  push: 
+    branches: [ feature ]
+  workflow_dispatch:
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
+        
+      - name: Deploy to Staging
+        run: |
+          awslocal s3 mb s3://staging-bucket || true
+          echo "Staging deployment complete!"
+          awslocal s3 ls
+
+  production:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: staging
+    steps:
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
+      
+      - name: Deploy to Production
+        run: |
+          awslocal s3 mb s3://production-bucket || true
+          echo "Production deployment complete!"
+          awslocal s3 ls
