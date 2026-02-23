@@ -36,8 +36,8 @@ jobs:
           TOPIC_ARN=$(awslocal sns list-topics --query 'Topic[0].TopicArn' --output text)
           $QUEUE_ARN=$(awslocal sqs get-queue-attributes \
              --queue-url http://localhost:4566/000000000000/notify-queue \)
-          --attribute-names QueueArn \
-          --query 'Attributes.QueueArn' --output text)
+             --attribute-names QueueArn \
+             --query 'Attributes.QueueArn' --output text)
           awslocal sns subscribe \
             --topic-arn $TOPIC_ARN \
             --protocol sqs \
