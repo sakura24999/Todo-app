@@ -7,15 +7,15 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    services:
-      localstack:
-        image: localstack/localstack
-        ports:
-          - 4566:4566
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,20 +25,9 @@ jobs:
       - name: Build Deployment Package
         run: |
           mkdir -p package
-          # 1. 依存関係のインストール
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt -t package/
-          fi
-          
-          # 2. ソースコードのコピー（画像に合わせて lambda_function に修正）
-          # 末尾に /. を付けることでディレクトリ自体ではなく「中身」を package 直下に置きます
           cp -r lambda_function/. package/
-          
-          # デバッグ用：ZIPにする前の中身を確認
           echo "Current package structure:"
           ls -R package
-          
-          # 3. ZIP圧縮
           cd package && zip -r ../function.zip .
 
       - name: Deploy to LocalStack
@@ -46,34 +35,15 @@ jobs:
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
           AWS_DEFAULT_REGION: ap-northeast-1
-          ENDPOINT_URL: http://localhost:4566
         run: |
-          # S3バケット作成（既存でもエラーにしない）
-          aws --endpoint-url=$ENDPOINT_URL s3 mb s3://s3-test-bucket || true
-
-          # S3へ最新のZIPをアップロード
-          aws --endpoint-url=$ENDPOINT_URL s3 cp function.zip s3://s3-test-bucket/function.zip
-
-          # 関数が存在するかチェック
-          if aws --endpoint-url=$ENDPOINT_URL lambda get-function --function-name lambda-function > /dev/null 2>&1; then
-            echo "Function exists. Updating code..."
-            aws --endpoint-url=$ENDPOINT_URL lambda update-function-code \
-              --function-name lambda-function \
-              --s3-bucket s3-test-bucket \
-              --s3-key function.zip
-          else
-            echo "Creating new function..."
-            # --handler は app.py 内の lambda_handler を指すように設定
-            aws --endpoint-url=$ENDPOINT_URL lambda create-function \
-              --function-name lambda-function \
-              --runtime python3.9 \
-              --role arn:aws:iam::000000000000:role/lambda-role \
-              --handler app.lambda_handler \
-              --code S3Bucket=s3-test-bucket,S3Key=function.zip
-          fi
-
-          # 状態が Active になるまで待機（これがあれば後の update-function-code は不要）
+          awslocal s3 mb s3://s3-test-bucket || true
+          awslocal s3 cp function.zip s3://s3-test-bucket/function.zip
+          awslocal lambda create-function \
+            --function-name lambda-function \
+            --runtime python3.9 \
+            --role arn:aws:iam::000000000000:role/lambda-role \
+            --handler app.lambda_handler \
+            --code S3Bucket=s3-test-bucket,S3Key=function.zip
           echo "Waiting for function to become Active..."
-          aws --endpoint-url=$ENDPOINT_URL lambda wait function-active-v2 --function-name lambda-function
-          
+          awslocal lambda wait function-active-v2 --function-name lambda-function
           echo "Deployment successful!"
