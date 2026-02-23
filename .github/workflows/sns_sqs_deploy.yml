@@ -48,6 +48,8 @@ jobs:
           mkdir -p package
           cp -r lambda_function/. package/
           pip install boto3 -t package/
+          echo "=== package内確認 ==="
+          ls -R package
           cd package && zip -r ../function.zip .
           awslocal s3 mb s3://s3-test-bucket/function.zip
           awslocal s3 cp function.zip s3://s3-test-bucket/function.zip
