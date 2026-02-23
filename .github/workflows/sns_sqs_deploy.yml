@@ -33,7 +33,7 @@ jobs:
 
       - name: Subscribe SQS to SNS
         run: |
-          TOPIC_ARN=$(awslocal sns list-topics --query 'Topic[0].TopicArn' --output text)
+          TOPIC_ARN=$(awslocal sns list-topics --query 'Topics[0].TopicArn' --output text)
           QUEUE_ARN=$(awslocal sqs get-queue-attributes \
             --queue-url http://localhost:4566/000000000000/notify-queue \
             --attribute-names QueueArn \
