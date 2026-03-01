@@ -76,7 +76,7 @@ jobs:
       - name: Publish v2
         run: |
           awslocal lambda create-alias \
-            --function-name blue-green-function
+            --function-name blue-green-function \
             --name live \
             --function-version 1 \
             --routing-config AdditionalVersionWeights={"2"=0.1}
