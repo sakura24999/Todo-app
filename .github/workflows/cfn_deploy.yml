@@ -24,7 +24,7 @@ jobs:
       - name: Deploy CloudFormation Stack
         run: |
           awslocal cloudformation create-stack \
-            --stack-name my-basic-stack
+            --stack-name my-basic-stack \
             --template-body file://cloudformation/template.yaml
           echo "=== スタック作成待機中 ==="
           awslocal cloudformation wait stack-create-complete \
