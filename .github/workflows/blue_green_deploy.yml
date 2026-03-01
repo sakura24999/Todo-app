@@ -59,6 +59,8 @@ jobs:
           rm -rf package && mkdir -p package
           cp -r lambda_function/. package/
           cd package && zip -r ../function_v2.zip . && cd ..
+          echo "=== zip確認 ==="
+          ls -la function_v2.zip
 
       - name: Deploy v2 to LocalStack
         run: |
