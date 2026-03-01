@@ -65,9 +65,9 @@ jobs:
       - name: Deploy v2 to LocalStack
         run: |
           ls -la function_v2.zip
-          awslocal s3 cp function_v2.zip s3://s3-test-bucket/function_v2_zip
+          awslocal s3 cp function_v2.zip s3://s3-test-bucket/function_v2.zip
           awslocal lambda update-function-code \
-            --function-name blue-green-function
+            --function-name blue-green-function \
             --s3-bucket s3-test-bucket \
             --s3-key function_v2.zip
           awslocal lambda wait function-updated-v2 \
