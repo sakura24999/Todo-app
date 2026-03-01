@@ -1,0 +1,56 @@
+name: CloudFormation Basic Stack
+
+on:
+  push:
+    branches: [ feature ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: ap-northeast-1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
+      
+      - name: Deploy CloudFormation Stack
+        run: |
+          awslocal cloudformation create-stack \
+            --stack-name my-basic-stack
+            --template-body file://cloudformation/template.yaml
+          echo "=== スタック作成待機中 ==="
+          awslocal cloudformation wait stack-create-complete \
+            --stack-name my-basic-stack
+      
+      - name: Verity Stack
+        run: |
+          echo "=== スタック確認 ==="
+          awslocal cloudformation describe-stacks \
+            --stack-name my-basic-stack
+          echo "=== リソース一覧 ==="
+          awslocal cloudformation describe-stack-resources \
+            --stack-name my-basic-stack
+
+      - name: Verify Resources
+        run: |
+          echo "=== S3バケット確認 ==="
+          awslocal s3 ls
+          echo "=== Lambda関数確認 ==="
+          awslocal lambda list-functions
+      
+      - name: Cleanup
+        run: |
+          echo "=== スタック削除 ==="
+          awslocal cloudformation delete-stack
+            --stack-name my-basic-stack
+          awslocal cloudformation wait stack-delete-complete \
+            --stack-name my-basic-stack
+          echo "=== 削除完了 ==="
