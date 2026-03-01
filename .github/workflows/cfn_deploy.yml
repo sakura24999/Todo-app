@@ -49,7 +49,7 @@ jobs:
       - name: Cleanup
         run: |
           echo "=== スタック削除 ==="
-          awslocal cloudformation delete-stack
+          awslocal cloudformation delete-stack \
             --stack-name my-basic-stack
           awslocal cloudformation wait stack-delete-complete \
             --stack-name my-basic-stack
