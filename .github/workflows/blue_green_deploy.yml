@@ -88,6 +88,12 @@ jobs:
           awslocal lambda get-alias \
             --function-name blue-green-function \
             --name live
+          awslocal lambda publish-version \
+            --function-name blue-green-function \
+            --description "v2"
+          echo "=== バージョン一覧確認 ==="
+          awslocal lambda list-versions-by-function \
+            --function-name blue-green-function
       
       - name: Invoke and verify traffic
         run: |
