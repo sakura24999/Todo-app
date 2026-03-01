@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3-1 CloudFormation Basic Stack
+
+Resources:
+  # S3バケット
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: cfn-artifact-bucket
+
+  # IAMロール
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cfn-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaBasicPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  # Lambda関数
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: cfn-lambda-function
+      Runtime: python3.9
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps({'message': 'Hello from CloudFormation!'})
+              }
+
+Outputs:
+  BucketName:
+    Value: !Ref ArtifactBucket
+    Description: S3バケット名
+
+  LambdaFunctionName:
+    Value: !Ref MyLambdaFunction
+    Description: Lambda関数名
