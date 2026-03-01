@@ -1,0 +1,119 @@
+name: Blue or Green Deploy
+
+on:
+  push:
+    branches: [ feature ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Build v1 Package
+        run: |
+          mkdir -p package
+          cp -r lambda_function/. package/
+          cd package && zip -r ../function_v1.zip . && cd ..
+
+      - name: Deploy v1 to LocalStack
+        run: |
+          awslocal s3 mb s3://s3-test-bucket || true
+          awslocal s3 cp ../function_v1.zip s3://s3-test-bucket/function_v1.zip
+          awslocal lambda create-function \
+            --function-name blue-green-function \
+            --runtime python3.9 \
+            --role arn:aws:iam::000000000000:role/lambda-role \
+            --handler app.lambda_handler \
+            --code S3Bucket=s3-test-bucket,S3Key=../function_v1.zip
+          awslocal lambda wait function-active-v2 \
+            --function-name blue-green-function
+
+      - name: Publish v1
+        run: |
+          awslocal lambda publish-vertion \
+            --function-name blue-green-function \
+            --description "v1"
+
+      - name: Update v2 code
+        run: |
+          cat > lambda_function/app.py << 'EOF'
+          import json
+          def lambda_handler(event, context):
+              return {
+                  "statusCode": 200,
+                  "body": json.dumps({"message": "v2からのレスポンスです!"})
+              }
+          EOF
+          rm -rf package && mkdir -p package
+          cp -r lambda_function/. package/
+          cd package && zip -r ../function_v2.zip . && cd ..
+
+      - name: Deploy v2 to LocalStack
+        run: |
+          awslocal s3 cp function_v2.zip s3://s3-test-bucket/function_v2_zip
+          awslocal lambda update-function-code \
+            --function-name blue-green-function
+            --s3-bucket s3-test-bucket \
+            --s3-key function_v2.zip
+          awslocal lambda wait function-updated-v2 \
+            --function-name blue-green-function
+
+      - name: Publish v2
+        run: |
+          awslocal lambda create-alias \
+            --function-name blue-green-function
+            --name live \
+            --function-version 1 \
+            --routing-config AdditionalVersionWeights={"2"=0.1}
+          echo "=== Alias確認 ==="
+          awslocal lambda get-alias \
+            --function-name blue-green-function \
+            --name live
+      
+      - name: Invoke and verify traffic
+        run: |
+          echo "=== 5回実行して振り分けを確認 ==="
+          for i in {1..5}; do
+            awslocal lambda invoke \
+              --function-name blue-green-function:live \
+              --payload '{}' \
+              output.json
+            cat output.json
+            echo ""
+          done
+      
+      - name: Shift to 100% v2
+        run: |
+          awslocal lambda update-alias \
+            --function-name blue-green-function \
+            --name live \
+            --function-version 2 \
+            --routing-config AdditionalVersionWeights={}
+          echo "=== 100% v2に切り替え完了 ==="
+          awslocal lambda get-alias \
+            --function-name blue-green-function \
+            --name live
+      
+      - name: Rollback to v1
+        run: |
+          awslocal lambda update-alias \
+            --function-name blue-green-function \
+            --name live
+            --function-version 1 \
+            --routing-config AdditionalVersionWeights={}
+          echo "=== v1にロールバック完了 ==="
+          awslocal lambda get-alias \
+            --function-name blue-green-function \
+            --name live
