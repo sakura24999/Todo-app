@@ -30,7 +30,7 @@ jobs:
       - name: Deploy v1 to LocalStack
         run: |
           awslocal s3 mb s3://s3-test-bucket || true
-          awslocal s3 cp ../function_v1.zip s3://s3-test-bucket/function_v1.zip \
+          awslocal s3 cp function_v1.zip s3://s3-test-bucket/function_v1.zip
           awslocal lambda create-function \
             --function-name blue-green-function \
             --runtime python3.9 \
