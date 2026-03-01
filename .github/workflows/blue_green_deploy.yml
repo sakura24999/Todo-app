@@ -123,7 +123,7 @@ jobs:
         run: |
           awslocal lambda update-alias \
             --function-name blue-green-function \
-            --name live
+            --name live \
             --function-version 1 \
             --routing-config AdditionalVersionWeights={}
           echo "=== v1にロールバック完了 ==="
