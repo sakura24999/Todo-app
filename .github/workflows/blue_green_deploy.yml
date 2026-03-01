@@ -42,7 +42,7 @@ jobs:
 
       - name: Publish v1
         run: |
-          awslocal lambda publish-vertion \
+          awslocal lambda publish-version \
             --function-name blue-green-function \
             --description "v1"
 
