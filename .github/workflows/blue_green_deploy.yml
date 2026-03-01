@@ -36,7 +36,7 @@ jobs:
             --runtime python3.9 \
             --role arn:aws:iam::000000000000:role/lambda-role \
             --handler app.lambda_handler \
-            --code S3Bucket=s3-test-bucket,S3Key=../function_v1.zip
+            --code S3Bucket=s3-test-bucket,S3Key=function_v1.zip
           awslocal lambda wait function-active-v2 \
             --function-name blue-green-function
 
